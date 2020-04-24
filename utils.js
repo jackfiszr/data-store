@@ -1,9 +1,6 @@
-"use strict";
-
-const fs = require("fs");
-const path = require("path");
-const assert = require("assert");
-const get = require("get-value");
+import { fs, path } from "./deps.ts";
+import { assertEquals } from "./test_deps.ts";
+import { get } from "./get_value.js";
 
 const split = (str) => {
   const segs = str.split(".");
@@ -15,16 +12,17 @@ const split = (str) => {
   return segs;
 };
 
-exports.stem = (filepath) => path.basename(filepath, path.extname(filepath));
+export const stem = (filepath) =>
+  path.basename(filepath, path.extname(filepath));
 
-exports.flatten = (...args) => [].concat.apply([], args);
-exports.unique = (arr) => arr.filter((ele, i) => arr.indexOf(ele) === i);
+export const flatten = (...args) => [].concat.apply([], args);
+export const unique = (arr) => arr.filter((ele, i) => arr.indexOf(ele) === i);
 
-exports.isEmptyPrimitive = (value) => {
+export const isEmptyPrimitive = (value) => {
   return value === "" || value === void 0 || value === null;
 };
 
-exports.del = (obj = {}, prop = "") => {
+export const del = (obj = {}, prop = "") => {
   if (!prop) return false;
   if (obj.hasOwnProperty(prop)) {
     delete obj[prop];
@@ -33,20 +31,20 @@ exports.del = (obj = {}, prop = "") => {
   const segs = split(prop);
   const last = segs.pop();
   const val = segs.length ? get(obj, segs.join(".")) : obj;
-  if (exports.isObject(val) && val.hasOwnProperty(last)) {
+  if (isObject(val) && val.hasOwnProperty(last)) {
     delete val[last];
     return true;
   }
 };
 
-exports.hasOwn = (obj = {}, prop = "") => {
+export const hasOwn = (obj = {}, prop = "") => {
   if (!prop) return false;
   if (obj.hasOwnProperty(prop)) return true;
   const segs = split(prop);
   const last = segs.pop();
   if (!segs.length) return false;
   const val = get(obj, segs.join("."));
-  return exports.isObject(val) && val.hasOwnProperty(last);
+  return isObject(val) && val.hasOwnProperty(last);
 };
 
 /**
@@ -54,25 +52,25 @@ exports.hasOwn = (obj = {}, prop = "") => {
  * cloning values that are valid in JSON.
  */
 
-exports.cloneDeep = (value) => {
+export const cloneDeep = (value) => {
   const obj = {};
-  switch (exports.typeOf(value)) {
+  switch (typeOf(value)) {
     case "object":
       for (const key of Object.keys(value)) {
-        obj[key] = exports.cloneDeep(value[key]);
+        obj[key] = cloneDeep(value[key]);
       }
       return obj;
     case "array":
-      return value.map((ele) => exports.cloneDeep(ele));
+      return value.map((ele) => cloneDeep(ele));
     default: {
       return value;
     }
   }
 };
 
-exports.isObject = (value) => exports.typeOf(value) === "object";
+export const isObject = (value) => typeOf(value) === "object";
 
-exports.typeOf = (value) => {
+export const typeOf = (value) => {
   if (value === null) return "null";
   if (value === void 0) return "undefined";
   if (Array.isArray(value)) return "array";
@@ -86,21 +84,21 @@ exports.typeOf = (value) => {
  * Create a directory and any intermediate directories that might exist.
  */
 
-exports.mkdir = (dirname, options = {}) => {
-  assert.equal(typeof dirname, "string", "expected dirname to be a string");
-  if (exports.directoryExists(dirname)) return;
+export const mkdir = (dirname, options = {}) => {
+  assertEquals(typeof dirname, "string", "expected dirname to be a string");
+  if (directoryExists(dirname)) return;
 
   try {
-    fs.mkdirSync(dirname, { ...options, recursive: true });
+    Deno.mkdirSync(dirname, { ...options, recursive: true });
   } catch (err) {
-    exports.handleError(dirname, err, options);
+    handleError(dirname, err, options);
   }
 
   return dirname;
 };
 
-exports.directoryExists = (dirname, strict = true) => {
-  const stat = exports.tryStat(dirname);
+export const directoryExists = (dirname, strict = true) => {
+  const stat = tryStat(dirname);
   if (stat) {
     if (strict && !stat.isDirectory()) {
       throw new Error(`Path exists and is not a directory: "${dirname}"`);
@@ -110,7 +108,7 @@ exports.directoryExists = (dirname, strict = true) => {
   return false;
 };
 
-exports.handleError = (dirname, err, options = {}) => {
+export const handleError = (dirname, err, options = {}) => {
   if (/null bytes/.test(err.message)) throw err;
 
   const isIgnored = ["EEXIST", "EISDIR", "EPERM"].includes(err.code) &&
@@ -122,7 +120,7 @@ exports.handleError = (dirname, err, options = {}) => {
   }
 };
 
-exports.tryStat = (filepath) => {
+export const tryStat = (filepath) => {
   try {
     return fs.statSync(filepath);
   } catch (err) {
@@ -130,9 +128,9 @@ exports.tryStat = (filepath) => {
   }
 };
 
-exports.tryUnlink = (filepath) => {
+export const tryUnlink = (filepath) => {
   try {
-    fs.unlinkSync(filepath);
+    Deno.removeSync(filepath);
   } catch (err) {
     if (err.code !== "ENOENT") {
       throw err;

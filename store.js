@@ -1,18 +1,12 @@
-"use strict";
+import { fs, path } from "./deps.ts";
+import { assertEquals } from "./test_deps.ts";
+import * as utils from "./utils.js";
 
-const kData = Symbol("data-store");
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const assert = require("assert");
-const utils = require("./utils");
+import { get } from "./get_value.js";
+import { set } from "./set_value.js";
 
-/**
- * Module dependencies
- */
-
-const get = require("get-value");
-const set = require("set-value");
+const kData = Symbol("deno-store");
+const homeDir = Deno.env("HOME");
 
 /**
  * Initialize a new `Store` with the given `name`, `options` and `default` data.
@@ -31,7 +25,7 @@ const set = require("set-value");
  * @api public
  */
 
-class Store {
+export class Store {
   constructor(name, options = {}, defaults = {}) {
     if (typeof name !== "string") {
       defaults = options;
@@ -40,18 +34,12 @@ class Store {
     }
 
     if (!options.path) {
-      assert.equal(typeof name, "string", "expected store name to be a string");
+      assertEquals(typeof name, "string", "expected store name to be a string");
     }
 
-    const opts = {
-      debounce: 0,
-      indent: 2,
-      home: os.homedir(),
-      name,
-      ...options,
-    };
+    const opts = { debounce: 0, indent: 2, home: homeDir, name, ...options };
 
-    this.name = opts.name || (opts.path ? utils.stem(opts.path) : "data-store");
+    this.name = opts.name || (opts.path ? utils.stem(opts.path) : "deno-store");
     this.path = opts.path || path.join(opts.home, `${this.name}.json`);
     this.indent = opts.indent;
     this.debounce = opts.debounce;
@@ -97,7 +85,7 @@ class Store {
         this.set(k.split(/\\?\./).join("\\."), key[k]);
       }
     } else {
-      assert.equal(typeof key, "string", "expected key to be a string");
+      assertEquals(typeof key, "string", "expected key to be a string");
       set(this.data, key, val);
     }
 
@@ -158,7 +146,7 @@ class Store {
    */
 
   union(key, ...rest) {
-    assert.equal(typeof key, "string", "expected key to be a string");
+    assertEquals(typeof key, "string", "expected key to be a string");
     const vals = this.get(key);
     const values = [].concat(utils.isEmptyPrimitive(vals) ? [] : vals);
     this.set(key, utils.unique(utils.flatten(...values, ...rest)));
@@ -186,7 +174,7 @@ class Store {
     if (typeof key === "undefined") {
       return this.data;
     }
-    assert.equal(typeof key, "string", "expected key to be a string");
+    assertEquals(typeof key, "string", "expected key to be a string");
     const value = get(this.data, key);
     if (typeof value === "undefined") {
       return fallback;
@@ -239,7 +227,7 @@ class Store {
    */
 
   hasOwn(key) {
-    assert.equal(typeof key, "string", "expected key to be a string");
+    assertEquals(typeof key, "string", "expected key to be a string");
     return utils.hasOwn(this.data, key);
   }
 
@@ -267,7 +255,7 @@ class Store {
       return this;
     }
 
-    assert.equal(
+    assertEquals(
       typeof key,
       "string",
       "expected key to be a string, use .clear() to delete all properties",
@@ -339,8 +327,10 @@ class Store {
    */
 
   writeFile() {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(this.json());
     utils.mkdir(path.dirname(this.path));
-    fs.writeFileSync(this.path, this.json(), { mode: 0o0600 });
+    Deno.writeFileSync(this.path, data, { mode: 0o0600 });
   }
 
   /**
@@ -447,12 +437,6 @@ class Store {
   }
 }
 
-/**
- * Expose `Store`
- */
-
-module.exports = function (...args) {
+export function createStore(...args) {
   return new Store(...args);
-};
-
-module.exports.Store = Store;
+}
