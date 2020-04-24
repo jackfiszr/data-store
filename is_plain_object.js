@@ -5,7 +5,7 @@
  * Released under the MIT License.
  */
 
-import isObject from "isobject";
+import { isObject } from "./deps.ts";
 
 function isObjectObject(o) {
   return isObject(o) === true &&
@@ -13,7 +13,7 @@ function isObjectObject(o) {
 }
 
 export default function isPlainObject(o) {
-  var ctor, prot;
+  let ctor, prot;
 
   if (isObjectObject(o) === false) return false;
 

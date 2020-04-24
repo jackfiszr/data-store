@@ -5,9 +5,9 @@
  * Released under the MIT License.
  */
 
-const isObject = require("isobject");
+import { isObject } from "./deps.ts";
 
-module.exports = function (target, path, options) {
+export function get(target, path, options) {
   if (!isObject(options)) {
     options = { default: options };
   }
@@ -83,7 +83,7 @@ module.exports = function (target, path, options) {
   }
 
   return options.default;
-};
+}
 
 function join(segs, joinChar, options) {
   if (typeof options.join === "function") {

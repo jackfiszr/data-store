@@ -7,9 +7,9 @@
 
 "use strict";
 
-const isPlain = require("is-plain-object");
+import isPlain from "./is_plain_object.js";
 
-function set(target, path, value, options) {
+export function set(target, path, value, options) {
   if (!isObject(target)) {
     return target;
   }
@@ -107,4 +107,3 @@ function isObject(val) {
 }
 
 set.memo = {};
-module.exports = set;
