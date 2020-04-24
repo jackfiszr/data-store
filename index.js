@@ -1,18 +1,18 @@
-'use strict';
+"use strict";
 
-const kData = Symbol('data-store');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const assert = require('assert');
-const utils = require('./utils');
+const kData = Symbol("data-store");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const assert = require("assert");
+const utils = require("./utils");
 
 /**
  * Module dependencies
  */
 
-const get = require('get-value');
-const set = require('set-value');
+const get = require("get-value");
+const set = require("set-value");
 
 /**
  * Initialize a new `Store` with the given `name`, `options` and `default` data.
@@ -33,19 +33,25 @@ const set = require('set-value');
 
 class Store {
   constructor(name, options = {}, defaults = {}) {
-    if (typeof name !== 'string') {
+    if (typeof name !== "string") {
       defaults = options;
       options = name || {};
       name = options.name;
     }
 
     if (!options.path) {
-      assert.equal(typeof name, 'string', 'expected store name to be a string');
+      assert.equal(typeof name, "string", "expected store name to be a string");
     }
 
-    const opts = { debounce: 0, indent: 2, home: os.homedir(), name, ...options };
+    const opts = {
+      debounce: 0,
+      indent: 2,
+      home: os.homedir(),
+      name,
+      ...options,
+    };
 
-    this.name = opts.name || (opts.path ? utils.stem(opts.path) : 'data-store');
+    this.name = opts.name || (opts.path ? utils.stem(opts.path) : "data-store");
     this.path = opts.path || path.join(opts.home, `${this.name}.json`);
     this.indent = opts.indent;
     this.debounce = opts.debounce;
@@ -53,10 +59,10 @@ class Store {
     this.timeouts = {};
 
     // Allow override of read and write methods
-    if (typeof options.readParseFile === 'function') {
+    if (typeof options.readParseFile === "function") {
       this.readParseFile = options.readParseFile;
     }
-    if (typeof options.writeFile === 'function') {
+    if (typeof options.writeFile === "function") {
       this.writeFile = options.writeFile;
     }
   }
@@ -82,16 +88,16 @@ class Store {
    */
 
   set(key, val) {
-    if (typeof key === 'string' && typeof val === 'undefined') {
+    if (typeof key === "string" && typeof val === "undefined") {
       return this.del(key);
     }
 
     if (utils.isObject(key)) {
       for (const k of Object.keys(key)) {
-        this.set(k.split(/\\?\./).join('\\.'), key[k]);
+        this.set(k.split(/\\?\./).join("\\."), key[k]);
       }
     } else {
-      assert.equal(typeof key, 'string', 'expected key to be a string');
+      assert.equal(typeof key, "string", "expected key to be a string");
       set(this.data, key, val);
     }
 
@@ -126,7 +132,7 @@ class Store {
 
   merge(key, val) {
     let oldVal = this.get(key);
-    if (oldVal && typeof oldVal === 'object' && !Array.isArray(oldVal)) {
+    if (oldVal && typeof oldVal === "object" && !Array.isArray(oldVal)) {
       val = Object.assign(this.get(key), val);
     }
     return this.set(key, val);
@@ -152,7 +158,7 @@ class Store {
    */
 
   union(key, ...rest) {
-    assert.equal(typeof key, 'string', 'expected key to be a string');
+    assert.equal(typeof key, "string", "expected key to be a string");
     const vals = this.get(key);
     const values = [].concat(utils.isEmptyPrimitive(vals) ? [] : vals);
     this.set(key, utils.unique(utils.flatten(...values, ...rest)));
@@ -177,12 +183,12 @@ class Store {
    */
 
   get(key, fallback) {
-	  if (typeof key === 'undefined') {
+    if (typeof key === "undefined") {
       return this.data;
     }
-    assert.equal(typeof key, 'string', 'expected key to be a string');
+    assert.equal(typeof key, "string", "expected key to be a string");
     const value = get(this.data, key);
-    if (typeof value === 'undefined') {
+    if (typeof value === "undefined") {
       return fallback;
     }
     return value;
@@ -206,7 +212,7 @@ class Store {
    */
 
   has(key) {
-    return typeof this.get(key) !== 'undefined';
+    return typeof this.get(key) !== "undefined";
   }
 
   /**
@@ -233,7 +239,7 @@ class Store {
    */
 
   hasOwn(key) {
-    assert.equal(typeof key, 'string', 'expected key to be a string');
+    assert.equal(typeof key, "string", "expected key to be a string");
     return utils.hasOwn(this.data, key);
   }
 
@@ -261,7 +267,11 @@ class Store {
       return this;
     }
 
-    assert.equal(typeof key, 'string', 'expected key to be a string, use .clear() to delete all properties');
+    assert.equal(
+      typeof key,
+      "string",
+      "expected key to be a string, use .clear() to delete all properties",
+    );
     if (utils.del(this.data, key)) {
       this.save();
     }
@@ -397,12 +407,13 @@ class Store {
     try {
       return (this[kData] = this.readParseFile());
     } catch (err) {
-      if (err.code === 'EACCES') {
-        err.message += '\ndata-store does not have permission to load this file\n';
+      if (err.code === "EACCES") {
+        err.message +=
+          "\ndata-store does not have permission to load this file\n";
         throw err;
       }
       // (re-)initialize if file doesn't exist or is corrupted
-      if (err.code === 'ENOENT' || err.name === 'SyntaxError') {
+      if (err.code === "ENOENT" || err.name === "SyntaxError") {
         this[kData] = {};
         return {};
       }
@@ -440,7 +451,7 @@ class Store {
  * Expose `Store`
  */
 
-module.exports = function(...args) {
+module.exports = function (...args) {
   return new Store(...args);
 };
 

@@ -1,11 +1,14 @@
-const Store = require('../');
-const store = new Store('app', { path: __dirname + '/data.json', debounce: 10 });
+const Store = require("../");
+const store = new Store(
+  "app",
+  { path: __dirname + "/data.json", debounce: 10 },
+);
 
-store.set('a', 'b');
-store.set({ c: 'd' });
-store.set('e.f.g', 'zzz');
+store.set("a", "b");
+store.set({ c: "d" });
+store.set("e.f.g", "zzz");
 
-console.log(store.get('e.f'));
+console.log(store.get("e.f"));
 //=> { g: 'zzz' }
 
 console.log(store.data);

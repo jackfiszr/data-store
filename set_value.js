@@ -5,9 +5,9 @@
  * Released under the MIT License.
  */
 
-'use strict';
+"use strict";
 
-const isPlain = require('is-plain-object');
+const isPlain = require("is-plain-object");
 
 function set(target, path, value, options) {
   if (!isObject(target)) {
@@ -16,12 +16,12 @@ function set(target, path, value, options) {
 
   let opts = options || {};
   const isArray = Array.isArray(path);
-  if (!isArray && typeof path !== 'string') {
+  if (!isArray && typeof path !== "string") {
     return target;
   }
 
   let merge = opts.merge;
-  if (merge && typeof merge !== 'function') {
+  if (merge && typeof merge !== "function") {
     merge = Object.assign;
   }
 
@@ -64,11 +64,11 @@ function split(path, options) {
   const id = createKey(path, options);
   if (set.memo[id]) return set.memo[id];
 
-  const char = (options && options.separator) ? options.separator : '.';
+  const char = (options && options.separator) ? options.separator : ".";
   let keys = [];
   let res = [];
 
-  if (options && typeof options.split === 'function') {
+  if (options && typeof options.split === "function") {
     keys = options.split(path);
   } else {
     keys = path.split(char);
@@ -76,7 +76,7 @@ function split(path, options) {
 
   for (let i = 0; i < keys.length; i++) {
     let prop = keys[i];
-    while (prop && prop.slice(-1) === '\\' && keys[i + 1] != null) {
+    while (prop && prop.slice(-1) === "\\" && keys[i + 1] != null) {
       prop = prop.slice(0, -1) + char + keys[++i];
     }
     res.push(prop);
@@ -87,23 +87,23 @@ function split(path, options) {
 
 function createKey(pattern, options) {
   let id = pattern;
-  if (typeof options === 'undefined') {
-    return id + '';
+  if (typeof options === "undefined") {
+    return id + "";
   }
   const keys = Object.keys(options);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    id += ';' + key + '=' + String(options[key]);
+    id += ";" + key + "=" + String(options[key]);
   }
   return id;
 }
 
 function isValidKey(key) {
-  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+  return key !== "__proto__" && key !== "constructor" && key !== "prototype";
 }
 
 function isObject(val) {
-  return val !== null && (typeof val === 'object' || typeof val === 'function');
+  return val !== null && (typeof val === "object" || typeof val === "function");
 }
 
 set.memo = {};
