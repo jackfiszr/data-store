@@ -6,7 +6,7 @@ import { get } from "./get_value.js";
 import { set } from "./set_value.js";
 
 const kData = Symbol("deno-store");
-const homeDir = Deno.env("HOME");
+const homeDir = Deno.env.get("HOME");
 
 /**
  * Initialize a new `Store` with the given `name`, `options` and `default` data.
